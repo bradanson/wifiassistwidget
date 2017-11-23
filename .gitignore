@@ -6,3 +6,4 @@
 *.apk
 build/
 .idea/gradle.xml
+app/libs/
