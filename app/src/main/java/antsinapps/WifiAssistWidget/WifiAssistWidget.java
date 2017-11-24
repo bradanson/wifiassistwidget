@@ -169,7 +169,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
             List<WifiConfiguration> list = wifi.getConfiguredNetworks();
             for( WifiConfiguration i : list ) {
                 if(i.SSID != null && i.SSID.equals(desiredSSID)) {
-                    Log.d("WifiConfiguration","ssid found: " + i.SSID);
+                    //Log.d("WifiConfiguration","ssid found: " + i.SSID);
                     wifi.disconnect();
                     wifi.enableNetwork(i.networkId, true);
                     wifi.reconnect();
