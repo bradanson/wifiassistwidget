@@ -6,11 +6,15 @@
     <string name="login">Log In</string>
     <string name="logout">Log Out</string>
     <string name="ssid">Wireless Network Name (I.E. "443WIFI")</string>
-    <string name="dialogTitle">"Initial Setup"</string>
+    <string name="userDialogTitle">"Initial Account Setup"</string>
+    <string name="wifiDialogTitle">"Select Your WiFi Network"</string>
     <string name="toast_logout">You have logged out</string>
     <string name="toast_login">You have logged in</string>
     <string name="toast_invalid_un_or_pw">Invalid username or password</string>
     <string name="toast_enabling_wifi">Enabling WiFi…</string>
+    <string name="toast_auth_failed">Authentication Failed</string>
+    <string name="toast_server_error">Server error encountered while logging in. Check your username/password or try again later.</string>
+    <string name="toast_no_networks">No WiFi networks found. Please enter SSID manually.</string>
     <string name="toast_not_connected_to_ssid">Not connected to given SSID: </string>
     <string name="toast_already_logged_in">You are already logged in - access denied</string>
 

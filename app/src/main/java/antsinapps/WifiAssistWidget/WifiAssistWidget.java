@@ -16,9 +16,11 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
@@ -61,12 +63,21 @@ public class WifiAssistWidget extends AppWidgetProvider {
         }
         RemoteViews remoteViews = getRemoteViewsBySize(context);
 
+        // Configure button for next click
         Intent intent = getIntentBySize(context);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
                 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
         remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
+
+        // Configure image for next click
+        Intent configureIntent = new Intent(context, ConfigureActivity.class);
+        configureIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
+        PendingIntent configPendingIntent = PendingIntent.getActivity(context,
+                0, configureIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.imageView, configPendingIntent);
+
+
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
     }
 
@@ -300,7 +311,15 @@ public class WifiAssistWidget extends AppWidgetProvider {
         }, new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError response) {
-                // Log.d("Error", response.toString());
+                Log.d("Error", response.toString());
+
+                if(response instanceof ServerError){
+                    Toast.makeText(context, context.getText(R.string.toast_server_error), Toast.LENGTH_LONG).show();
+                }
+
+                if(response instanceof AuthFailureError){
+                    Toast.makeText(context, context.getText(R.string.toast_auth_failed), Toast.LENGTH_SHORT).show();
+                }
 
                 if(response instanceof NoConnectionError){
                     //Log.d("Error", "BAD - NOT CONNECTED TO WIFI");
@@ -355,7 +374,16 @@ public class WifiAssistWidget extends AppWidgetProvider {
         }, new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError response) {
-                //Log.d("LoginError", response.toString());
+                Log.d("LoginError", response.toString());
+
+                if(response instanceof ServerError){
+                    Toast.makeText(context, context.getText(R.string.toast_server_error), Toast.LENGTH_LONG).show();
+                }
+
+                if(response instanceof AuthFailureError){
+                    Toast.makeText(context, context.getText(R.string.toast_auth_failed), Toast.LENGTH_SHORT).show();
+                }
+
                 if(response instanceof NoConnectionError){
                     //  Log.d("LoginError", "NOT CONNECTED TO WIFI");
                     Toast.makeText(context, context.getText(R.string.toast_not_connected_to_ssid) + ssid,
