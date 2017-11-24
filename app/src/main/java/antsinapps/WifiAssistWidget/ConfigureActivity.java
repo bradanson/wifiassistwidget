@@ -16,6 +16,7 @@ public class ConfigureActivity extends AppCompatActivity {
 
     String username;
     String password;
+    String ssid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +37,8 @@ public class ConfigureActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getResources().getString(R.string.dialogTitle));
         ViewGroup view = (ViewGroup) findViewById(android.R.id.content);
-        View viewInflated = LayoutInflater.from(this).inflate(R.layout.input_layout, view, false);
+        View viewInflated = LayoutInflater.from(this).inflate(R.layout.dialog_input_layout, view, false);
+        final EditText ssidInput = (EditText) viewInflated.findViewById(R.id.ssidInput);
         final EditText usernameInput = (EditText) viewInflated.findViewById(R.id.usernameInput);
         final EditText passwordInput = (EditText) viewInflated.findViewById(R.id.passwordInput);
         builder.setView(viewInflated);
@@ -46,8 +48,10 @@ public class ConfigureActivity extends AppCompatActivity {
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                ssid = ssidInput.getText().toString();
                 username = usernameInput.getText().toString();
                 password = passwordInput.getText().toString();
+                Utils.writeSessionData(c, "ssid", ssid);
                 Utils.writeSessionData(c, "username", username);
                 Utils.writeSessionData(c, "password", password);
                 dialog.dismiss();
@@ -68,6 +72,7 @@ public class ConfigureActivity extends AppCompatActivity {
 
         Utils.writeSessionData(this, "username", username);
         Utils.writeSessionData(this, "password", password);
+        Utils.writeSessionData(this, "ssid", ssid);
     }
 
 }

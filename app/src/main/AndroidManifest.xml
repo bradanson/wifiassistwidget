@@ -16,15 +16,28 @@
         android:supportsRtl="true"
         android:label="WifiAssistWidget"
         android:theme="@style/Theme.AppCompat.Dialog.Alert">
-        <receiver android:name="antsinapps.WifiAssistWidget.WifiAssistWidget">
+        <receiver android:name="antsinapps.WifiAssistWidget.WifiAssistWidgetLarge">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="AUTO_UPDATE" />
+                <action android:name="LARGE_APPWIDGET_UPDATE" />
+                <action android:name="LARGE_AUTO_UPDATE" />
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/simple_widget_info" />
+                android:resource="@xml/widget_large_info" />
+        </receiver>
+
+        <receiver android:name="antsinapps.WifiAssistWidget.WifiAssistWidgetSmall">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="SMALL_APPWIDGET_UPDATE" />
+                <action android:name="SMALL_AUTO_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_small_info" />
         </receiver>
 
         <activity

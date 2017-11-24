@@ -3,9 +3,9 @@
     android:minWidth="200dp"
     android:minHeight="60dp"
     android:updatePeriodMillis="0"
-    android:initialLayout="@layout/simple_widget"
+    android:initialLayout="@layout/small_widget"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen|keyguard"
     android:configure="antsinapps.WifiAssistWidget.ConfigureActivity"
-    android:previewImage="@drawable/preview">
+    android:previewImage="@drawable/large_preview">
 </appwidget-provider>
