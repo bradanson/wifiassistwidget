@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.wifi.ScanResult;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -136,9 +137,26 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 }
             });
         }
+        final String desiredSSID = "\"" + ssid.toUpperCase() + "\"";
+        boolean ssidFound = false;
+        for(ScanResult i : wifi.getScanResults()){
+            if(i.SSID.toUpperCase().equals(ssid.toUpperCase())){
+                ssidFound=true;
+                break;
+            }
+        }
+        if(!ssidFound){
+            ThreadManager.runOnUi(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(c.getApplicationContext(), "Network "+ desiredSSID +" not found.",
+                            Toast.LENGTH_LONG).show();
+                }
+            });
+            return;
+        }
 
         WifiInfo wifiInfo = wifi.getConnectionInfo();
-        final String desiredSSID = "\"" + ssid.toUpperCase() + "\"";
         if (wifiInfo.getSupplicantState() != SupplicantState.COMPLETED || !wifiInfo.getSSID().equals(desiredSSID)) {
             //NOT CONNECTED TO A NETWORK OR NOT CONNECTED TO SPECIFIED SSID
             if (!wifiInfo.getSSID().equals(desiredSSID)) {
@@ -149,10 +167,9 @@ public class WifiAssistWidget extends AppWidgetProvider {
             conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
             wifi.addNetwork(conf);
             List<WifiConfiguration> list = wifi.getConfiguredNetworks();
-            boolean ssidFound = false;
             for( WifiConfiguration i : list ) {
                 if(i.SSID != null && i.SSID.equals(desiredSSID)) {
-                    ssidFound = true;
+                    Log.d("WifiConfiguration","ssid found: " + i.SSID);
                     wifi.disconnect();
                     wifi.enableNetwork(i.networkId, true);
                     wifi.reconnect();
@@ -165,10 +182,6 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     });
                     break;
                 }
-            }
-            if(!ssidFound){
-                Toast.makeText(c.getApplicationContext(), "Network "+ desiredSSID +" not found.",
-                        Toast.LENGTH_LONG).show();
             }
         }
         if (!wifiInfo.getSSID().equals(desiredSSID)) {
