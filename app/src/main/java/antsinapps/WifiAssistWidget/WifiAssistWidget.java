@@ -160,16 +160,16 @@ public class WifiAssistWidget extends AppWidgetProvider {
             ThreadManager.runOnUi(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(c.getApplicationContext(), "Network "+ desiredSSID +" not found.",
+                    Toast.makeText(c.getApplicationContext(), "Network "+ desiredSSID +" not found. Will attempt to force connect.",
                             Toast.LENGTH_LONG).show();
                 }
             });
-            return;
         }
+
 
         WifiInfo wifiInfo = wifi.getConnectionInfo();
         if (wifiInfo.getSupplicantState() != SupplicantState.COMPLETED || !wifiInfo.getSSID().equals(desiredSSID)) {
-            //NOT CONNECTED TO A NETWORK OR NOT CONNECTED TO SPECIFIED SSID
+            // If user is not connected to a network or not the provided SSID, connect them
             if (!wifiInfo.getSSID().equals(desiredSSID)) {
                 //Not connected to desired network
             }

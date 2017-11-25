@@ -1,12 +1,15 @@
 package antsinapps.WifiAssistWidget;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -41,21 +44,72 @@ public class ConfigureActivity extends AppCompatActivity {
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetID);
         setResult(RESULT_OK, resultValue);
         final ViewGroup contentView = (ViewGroup) findViewById(android.R.id.content);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                        checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                        checkSelfPermission(Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
+                        checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
+                        checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED))
+        {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE,
+                    Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.ACCESS_NETWORK_STATE}, 0x12345);
+        }else{
+            // Either app already granted permissions or device is older than Marshmallow
+            // Enable WIFI
+            WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            if (!wifi.isWifiEnabled()){
+                //Log.d("WifiCheck", "WIFI NOT ENABLED");
+                wifi.setWifiEnabled(true);
+                Toast.makeText(getApplicationContext(), getText(R.string.toast_enabling_wifi), Toast.LENGTH_LONG).show();
+            }
 
-        // Enable WIFI
-        WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        if (!wifi.isWifiEnabled()){
-            //Log.d("WifiCheck", "WIFI NOT ENABLED");
-            wifi.setWifiEnabled(true);
-            Toast.makeText(getApplicationContext(), getText(R.string.toast_enabling_wifi), Toast.LENGTH_LONG).show();
+            // Prune for duplicates in scanned list
+            Set<String> hs = new HashSet<>();
+            for(ScanResult i : wifi.getScanResults()){
+                hs.add(i.SSID);
+            }
+
+            // Show SSID Dialog, then User Info Dialog
+            showDialogs(hs, contentView);
         }
 
-        // Prune for duplicates in scanned list
-        Set<String> hs = new HashSet<>();
-        for(ScanResult i : wifi.getScanResults()){
-            hs.add(i.SSID);
-        }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        final ViewGroup contentView = (ViewGroup) findViewById(android.R.id.content);
+        if (requestCode == 0x12345) {
+            for (int grantResult : grantResults) {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+            }
+            // Enable WIFI
+            WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            if (!wifi.isWifiEnabled()){
+                //Log.d("WifiCheck", "WIFI NOT ENABLED");
+                wifi.setWifiEnabled(true);
+                Toast.makeText(getApplicationContext(), getText(R.string.toast_enabling_wifi), Toast.LENGTH_LONG).show();
+            }
+
+            // Prune for duplicates in scanned list
+            Set<String> hs = new HashSet<>();
+            for(ScanResult i : wifi.getScanResults()){
+                hs.add(i.SSID);
+            }
+
+            // Show SSID Dialog, then User Info Dialog
+            showDialogs(hs, contentView);
+        }else{
+            // User did not grant permissions to check for WiFi
+            showUserInfoDialog(contentView,"");
+        }
+    }
+
+    private void showDialogs(Set<String> hs, final ViewGroup contentView) {
         final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
                 ConfigureActivity.this,
                 android.R.layout.select_dialog_singlechoice);
