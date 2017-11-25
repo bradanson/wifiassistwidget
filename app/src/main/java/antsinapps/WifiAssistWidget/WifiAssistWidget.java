@@ -209,8 +209,11 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
     private void checkStatusWithoutLogin(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager, final int iter) {
         //Log.d("CheckStatusWithoutLogin", "Checking Status Without Logging In..");
-
-        StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssid+".net/status", new Response.Listener<String>() {
+        String ssidToQuery = ssid;
+        if(ssid.contains(" ")){
+            ssidToQuery = ssid.substring(0, ssid.indexOf(" "));
+        }
+        StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssidToQuery+".net/status", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 //Log.d("statusRequest", response.toString());
@@ -282,7 +285,11 @@ public class WifiAssistWidget extends AppWidgetProvider {
     void checkStatus(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager, final int iter) {
         //  Log.d("statusRequest", "Sending request");
         //  Log.d("statusRequest", "url: "+ "http://login."+ssid+".net/status");
-        StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssid+".net/status", new Response.Listener<String>() {
+        String ssidToQuery = ssid;
+        if(ssid.contains(" ")){
+            ssidToQuery = ssid.substring(0, ssid.indexOf(" "));
+        }
+        StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssidToQuery+".net/status", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 //Log.d("statusRequest", response.toString());
@@ -336,7 +343,12 @@ public class WifiAssistWidget extends AppWidgetProvider {
     }
 
     private void attemptLogin(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager) {
-        String loginUrl = "http://login."+ssid+".net/login?username=" + username + "&password=" + password;
+        String ssidToQuery = ssid;
+        if(ssid.contains(" ")){
+            ssidToQuery = ssid.substring(0, ssid.indexOf(" "));
+        }
+
+        String loginUrl = "http://login."+ssidToQuery+".net/login?username=" + username + "&password=" + password;
         // Log.d("loginRequest", "url: " + loginUrl);
         StringRequest sr = new StringRequest(Request.Method.POST, loginUrl, new Response.Listener<String>() {
             @Override
