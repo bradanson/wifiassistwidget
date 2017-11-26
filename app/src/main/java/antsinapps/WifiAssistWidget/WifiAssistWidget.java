@@ -160,7 +160,8 @@ public class WifiAssistWidget extends AppWidgetProvider {
             ThreadManager.runOnUi(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(c.getApplicationContext(), "Network "+ desiredSSID +" not found. Will attempt to force connect.",
+                    Toast.makeText(c.getApplicationContext(), "Network "+ desiredSSID +" not found." +
+                                    " Are location services turned on? Attempting to force connection..",
                             Toast.LENGTH_LONG).show();
                 }
             });
@@ -209,10 +210,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
     private void checkStatusWithoutLogin(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager, final int iter) {
         //Log.d("CheckStatusWithoutLogin", "Checking Status Without Logging In..");
-        String ssidToQuery = ssid;
-        if(ssid.contains(" ")){
-            ssidToQuery = ssid.substring(0, ssid.indexOf(" "));
-        }
+        String ssidToQuery = conditionSSIDToQuery();
         StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssidToQuery+".net/status", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -239,6 +237,17 @@ public class WifiAssistWidget extends AppWidgetProvider {
             }
         });
         SingleRequestQueue.getInstance(context).add(sr);
+    }
+
+    private String conditionSSIDToQuery() {
+        String ssidToQuery = ssid;
+        if(ssid.contains(" ")){
+            ssidToQuery = ssid.substring(0, ssid.indexOf(" "));
+        }
+        if(ssidToQuery.contains("-")){
+            ssidToQuery = ssidToQuery.replace("-","");
+        }
+        return ssidToQuery;
     }
 
     private void showLogIn(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
@@ -285,10 +294,8 @@ public class WifiAssistWidget extends AppWidgetProvider {
     void checkStatus(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager, final int iter) {
         //  Log.d("statusRequest", "Sending request");
         //  Log.d("statusRequest", "url: "+ "http://login."+ssid+".net/status");
-        String ssidToQuery = ssid;
-        if(ssid.contains(" ")){
-            ssidToQuery = ssid.substring(0, ssid.indexOf(" "));
-        }
+        String ssidToQuery = conditionSSIDToQuery();
+
         StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssidToQuery+".net/status", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -343,10 +350,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
     }
 
     private void attemptLogin(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager) {
-        String ssidToQuery = ssid;
-        if(ssid.contains(" ")){
-            ssidToQuery = ssid.substring(0, ssid.indexOf(" "));
-        }
+        String ssidToQuery = conditionSSIDToQuery();
 
         String loginUrl = "http://login."+ssidToQuery+".net/login?username=" + username + "&password=" + password;
         // Log.d("loginRequest", "url: " + loginUrl);

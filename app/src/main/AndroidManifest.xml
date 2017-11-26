@@ -2,21 +2,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="antsinapps.WifiAssistWidget">
 
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/good_signal"
+        android:label="Wifi Assist Widget"
         android:roundIcon="@drawable/good_signal"
         android:supportsRtl="true"
-        android:label="WifiAssistWidget"
-        android:theme="@style/Theme.AppCompat.Dialog.Alert">
-        <receiver android:name="antsinapps.WifiAssistWidget.WifiAssistWidgetLarge">
+        android:theme="@style/Theme.AppCompat.NoActionBar">
+        <receiver android:name=".WifiAssistWidgetLarge">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="LARGE_APPWIDGET_UPDATE" />
@@ -27,8 +28,7 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_large_info" />
         </receiver>
-
-        <receiver android:name="antsinapps.WifiAssistWidget.WifiAssistWidgetSmall">
+        <receiver android:name=".WifiAssistWidgetSmall">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="SMALL_APPWIDGET_UPDATE" />
@@ -41,12 +41,13 @@
         </receiver>
 
         <activity
-            android:name="antsinapps.WifiAssistWidget.ConfigureActivity"
+            android:name=".ConfigureActivity"
             android:theme="@style/Theme.AppCompat.Dialog.Alert">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
