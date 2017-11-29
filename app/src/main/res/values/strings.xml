@@ -4,6 +4,7 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="login">Log In</string>
+    <string name="check_status">Check Status</string>
     <string name="logout">Log Out</string>
     <string name="ssid">Wireless Network Name (I.E. "443WIFI")</string>
     <string name="userDialogTitle">"Initial Account Setup"</string>

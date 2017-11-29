@@ -32,6 +32,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
     String password;
     String ssid;
     String WIDGET_SIZE;
+    boolean uncertainState;
     static String WIDGET_LARGE = "LARGE";
     static String WIDGET_SMALL = "SMALL";
     public static final String ACTION_LARGE_AUTO_UPDATE = "LARGE_AUTO_UPDATE";
@@ -110,7 +111,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             ComponentName thisAppWidget = getComponentNameBySize(context);
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
-            checkStatusWithoutLogin(context, appWidgetIds, appWidgetManager, 0);
+            alarmCheckStatus(context, appWidgetIds, appWidgetManager, 0);
             return;
         }
 
@@ -208,7 +209,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
         }
     }
 
-    private void checkStatusWithoutLogin(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager, final int iter) {
+    private void alarmCheckStatus(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager, final int iter) {
         //Log.d("CheckStatusWithoutLogin", "Checking Status Without Logging In..");
         String ssidToQuery = conditionSSIDToQuery();
         StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssidToQuery+".net/status", new Response.Listener<String>() {
@@ -218,9 +219,11 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
                 if(response.contains(" | Login Page")){
                     // Log.d("CheckStatusWithoutLogin", "BAD - Not logged in. Setting symbol/stopping alarm.");
-                    showLogIn(context, appWidgetManager, appWidgetIds);
+                    showUncertain(context, appWidgetManager, appWidgetIds);
+                    uncertainState = true;
                     stopAlarm(context);
                 }else if(response.contains("Status | ")){
+                    uncertainState = false;
                     // Log.d("CheckStatusWithoutLogin","GOOD - LOGGED IN ALREADY");
                     RemoteViews remoteViews = getRemoteViewsBySize(context);
                     remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.logout));
@@ -238,7 +241,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
                 if(response instanceof NoConnectionError){
                     // Log.d("CheckStatusWithoutLogin", "ERROR/BAD - NOT CONNECTED TO WIFI");
-                    showLogIn(context, appWidgetManager, appWidgetIds);
+                    showUncertain(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }
             }
@@ -257,10 +260,28 @@ public class WifiAssistWidget extends AppWidgetProvider {
         return ssidToQuery;
     }
 
-    private void showLogIn(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+    private void showLoggedOut(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         RemoteViews remoteViews = getRemoteViewsBySize(context);
         remoteViews.setImageViewResource(R.id.imageView, R.drawable.bad_signal);
         remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.login));
+        for(int i : appWidgetIds) {
+            appWidgetManager.updateAppWidget(i, remoteViews);
+        }
+    }
+
+    private void showLoggedIn(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        RemoteViews remoteViews = getRemoteViewsBySize(context);
+        remoteViews.setImageViewResource(R.id.imageView, R.drawable.good_signal);
+        remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.logout));
+        for(int i : appWidgetIds) {
+            appWidgetManager.updateAppWidget(i, remoteViews);
+        }
+    }
+
+    private void showUncertain(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        RemoteViews remoteViews = getRemoteViewsBySize(context);
+        remoteViews.setImageViewResource(R.id.imageView, R.drawable.unsure);
+        remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.check_status));
         for(int i : appWidgetIds) {
             appWidgetManager.updateAppWidget(i, remoteViews);
         }
@@ -316,15 +337,21 @@ public class WifiAssistWidget extends AppWidgetProvider {
                         0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 if(response.contains(" | Login Page")){
                     //Log.d("statusRequest", "BAD - Not logged in, attempting login");
-                    remoteViews.setImageViewResource(R.id.imageView, R.drawable.bad_signal);
-                    if(!username.equals("DNE") && !username.equals("username")) {
+                    showLoggedOut(context, appWidgetManager, appWidgetIds);
+                    uncertainState = false;
+                    if(!username.equals("DNE") && !username.equals("username") && !uncertainState){
                         attemptLogin(context, appWidgetIds, appWidgetManager);
                     } else{
                         // Log.d("statusRequest", "BAD - username not set");
                     }
                 }else if(response.contains("Status | ")){
                     //Log.d("statusRequest","GOOD - ALREADY LOGGED IN");
-                    requestLogout(context, appWidgetIds, appWidgetManager);
+                    if(uncertainState) {
+                        showLoggedIn(context, appWidgetManager, appWidgetIds);
+                        startAlarm(context);
+                    }else{
+                        requestLogout(context, appWidgetIds, appWidgetManager);
+                    }
                 }else {
                     //Log.d("statusRequest", "Response from website not recognized.");
                 }
@@ -377,22 +404,21 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 if(response.contains("You are already logged in")){
                     Toast.makeText(context, context.getText(R.string.toast_already_logged_in), Toast.LENGTH_SHORT).show();
                     // Log.d("loginRequest", "BAD - ALREADY LOGGED IN ON ANOTHER DEVICE");
-                    showLogIn(context, appWidgetManager, appWidgetIds);
+                    showLoggedOut(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }else if(response.contains("invalid username or password")){
                     Toast.makeText(context, context.getText(R.string.toast_invalid_un_or_pw), Toast.LENGTH_SHORT).show();
                     //Log.d("loginRequest", "BAD - invalid username or password");
-                    showLogIn(context, appWidgetManager, appWidgetIds);
+                    showLoggedOut(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }else if(response.contains("access denied")){
                     // Log.d("loginRequest", "BAD - ACCESS DENIED");
-                    showLogIn(context, appWidgetManager, appWidgetIds);
+                    showLoggedOut(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }else if(response.contains("You are logged in")) {
                     Toast.makeText(context, context.getText(R.string.toast_login), Toast.LENGTH_SHORT).show();
                     // Log.d("loginRequest", "GOOD - LOGGED IN");
-                    remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.logout));
-                    remoteViews.setImageViewResource(R.id.imageView, R.drawable.good_signal);
+                    showLoggedIn(context, appWidgetManager, appWidgetIds);
                     startAlarm(context);
                 }
                 remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
@@ -441,7 +467,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     Toast.makeText(context, context.getText(R.string.toast_logout), Toast.LENGTH_SHORT).show();
                     //Log.d("logoutRequest", "LOGGED OUT");
                 }
-                showLogIn(context, appWidgetManager, appWidgetIds);
+                showLoggedOut(context, appWidgetManager, appWidgetIds);
                 remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
                 for(int i : appWidgetIds) {
                     appWidgetManager.updateAppWidget(i, remoteViews);
