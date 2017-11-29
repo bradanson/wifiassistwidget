@@ -32,7 +32,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
     String password;
     String ssid;
     String WIDGET_SIZE;
-    boolean uncertainState;
+    static boolean uncertainState;
     static String WIDGET_LARGE = "LARGE";
     static String WIDGET_SMALL = "SMALL";
     public static final String ACTION_LARGE_AUTO_UPDATE = "LARGE_AUTO_UPDATE";
@@ -161,9 +161,11 @@ public class WifiAssistWidget extends AppWidgetProvider {
             ThreadManager.runOnUi(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(c.getApplicationContext(), "Network "+ desiredSSID +" not found." +
-                                    " Are location services turned on? Attempting to force connection..",
-                            Toast.LENGTH_LONG).show();
+                    if(!uncertainState) {
+                        Toast.makeText(c.getApplicationContext(), "Network " + desiredSSID + " not found." +
+                                        " Are location services turned on? Attempting to force connection..",
+                                Toast.LENGTH_LONG).show();
+                    }
                 }
             });
         }
@@ -219,19 +221,14 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
                 if(response.contains(" | Login Page")){
                     // Log.d("CheckStatusWithoutLogin", "BAD - Not logged in. Setting symbol/stopping alarm.");
-                    showUncertain(context, appWidgetManager, appWidgetIds);
-                    uncertainState = true;
+                    showLoggedOut(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }else if(response.contains("Status | ")){
-                    uncertainState = false;
                     // Log.d("CheckStatusWithoutLogin","GOOD - LOGGED IN ALREADY");
-                    RemoteViews remoteViews = getRemoteViewsBySize(context);
-                    remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.logout));
-                    remoteViews.setImageViewResource(R.id.imageView, R.drawable.good_signal);
-                    startAlarm(context);
-                    for(int i : appWidgetIds) {
-                        appWidgetManager.updateAppWidget(i, remoteViews);
-                    }
+                    showLoggedIn(context,appWidgetManager,appWidgetIds);
+                }else{
+                    showUncertain(context, appWidgetManager, appWidgetIds);
+                    stopAlarm(context);
                 }
             }
         }, new Response.ErrorListener(){
@@ -239,11 +236,12 @@ public class WifiAssistWidget extends AppWidgetProvider {
             public void onErrorResponse(VolleyError response) {
                 //   Log.d("Error", response.toString());
 
-                if(response instanceof NoConnectionError){
+
+                //if(response instanceof NoConnectionError){
                     // Log.d("CheckStatusWithoutLogin", "ERROR/BAD - NOT CONNECTED TO WIFI");
                     showUncertain(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
-                }
+                //}
             }
         });
         SingleRequestQueue.getInstance(context).add(sr);
@@ -267,15 +265,20 @@ public class WifiAssistWidget extends AppWidgetProvider {
         for(int i : appWidgetIds) {
             appWidgetManager.updateAppWidget(i, remoteViews);
         }
+        //Log.d("uncertainState", "false");
+        uncertainState = false;
     }
 
     private void showLoggedIn(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         RemoteViews remoteViews = getRemoteViewsBySize(context);
         remoteViews.setImageViewResource(R.id.imageView, R.drawable.good_signal);
         remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.logout));
+
         for(int i : appWidgetIds) {
             appWidgetManager.updateAppWidget(i, remoteViews);
         }
+        //Log.d("uncertainState", "false");
+        uncertainState = false;
     }
 
     private void showUncertain(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -285,6 +288,8 @@ public class WifiAssistWidget extends AppWidgetProvider {
         for(int i : appWidgetIds) {
             appWidgetManager.updateAppWidget(i, remoteViews);
         }
+        //Log.d("uncertainState", "true");
+        uncertainState = true;
     }
 
     private RemoteViews getRemoteViewsBySize(Context context) {
@@ -337,15 +342,16 @@ public class WifiAssistWidget extends AppWidgetProvider {
                         0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 if(response.contains(" | Login Page")){
                     //Log.d("statusRequest", "BAD - Not logged in, attempting login");
-                    showLoggedOut(context, appWidgetManager, appWidgetIds);
-                    uncertainState = false;
-                    if(!username.equals("DNE") && !username.equals("username") && !uncertainState){
-                        attemptLogin(context, appWidgetIds, appWidgetManager);
-                    } else{
+                    if(!username.equals("DNE") && !username.equals("username")){
+                        //Log.d("uncertainState", "Login Page: checkStatus at runtime is: " + uncertainState);
+                        if(uncertainState) showLoggedOut(context, appWidgetManager, appWidgetIds);
+                        else attemptLogin(context, appWidgetIds, appWidgetManager);
+                    }else{
                         // Log.d("statusRequest", "BAD - username not set");
                     }
                 }else if(response.contains("Status | ")){
                     //Log.d("statusRequest","GOOD - ALREADY LOGGED IN");
+                    //Log.d("uncertainState", "Status | checkStatus at runtime is: " + uncertainState);
                     if(uncertainState) {
                         showLoggedIn(context, appWidgetManager, appWidgetIds);
                         startAlarm(context);
