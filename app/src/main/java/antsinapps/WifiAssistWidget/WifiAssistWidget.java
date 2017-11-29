@@ -218,10 +218,17 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
                 if(response.contains(" | Login Page")){
                     // Log.d("CheckStatusWithoutLogin", "BAD - Not logged in. Setting symbol/stopping alarm.");
-                    showLogIn(context, appWidgetManager, appWidgetIds[0]);
+                    showLogIn(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }else if(response.contains("Status | ")){
                     // Log.d("CheckStatusWithoutLogin","GOOD - LOGGED IN ALREADY");
+                    RemoteViews remoteViews = getRemoteViewsBySize(context);
+                    remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.logout));
+                    remoteViews.setImageViewResource(R.id.imageView, R.drawable.good_signal);
+                    startAlarm(context);
+                    for(int i : appWidgetIds) {
+                        appWidgetManager.updateAppWidget(i, remoteViews);
+                    }
                 }
             }
         }, new Response.ErrorListener(){
@@ -231,7 +238,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
                 if(response instanceof NoConnectionError){
                     // Log.d("CheckStatusWithoutLogin", "ERROR/BAD - NOT CONNECTED TO WIFI");
-                    showLogIn(context, appWidgetManager, appWidgetIds[0]);
+                    showLogIn(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }
             }
@@ -250,11 +257,13 @@ public class WifiAssistWidget extends AppWidgetProvider {
         return ssidToQuery;
     }
 
-    private void showLogIn(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+    private void showLogIn(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         RemoteViews remoteViews = getRemoteViewsBySize(context);
         remoteViews.setImageViewResource(R.id.imageView, R.drawable.bad_signal);
         remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.login));
-        appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
+        for(int i : appWidgetIds) {
+            appWidgetManager.updateAppWidget(i, remoteViews);
+        }
     }
 
     private RemoteViews getRemoteViewsBySize(Context context) {
@@ -320,7 +329,9 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     //Log.d("statusRequest", "Response from website not recognized.");
                 }
                 remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
-                appWidgetManager.updateAppWidget(appWidgetIds[0], remoteViews);
+                for(int i : appWidgetIds) {
+                    appWidgetManager.updateAppWidget(i, remoteViews);
+                }
             }
         }, new Response.ErrorListener(){
             @Override
@@ -366,16 +377,16 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 if(response.contains("You are already logged in")){
                     Toast.makeText(context, context.getText(R.string.toast_already_logged_in), Toast.LENGTH_SHORT).show();
                     // Log.d("loginRequest", "BAD - ALREADY LOGGED IN ON ANOTHER DEVICE");
-                    showLogIn(context, appWidgetManager, appWidgetIds[0]);
+                    showLogIn(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }else if(response.contains("invalid username or password")){
                     Toast.makeText(context, context.getText(R.string.toast_invalid_un_or_pw), Toast.LENGTH_SHORT).show();
                     //Log.d("loginRequest", "BAD - invalid username or password");
-                    showLogIn(context, appWidgetManager, appWidgetIds[0]);
+                    showLogIn(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }else if(response.contains("access denied")){
                     // Log.d("loginRequest", "BAD - ACCESS DENIED");
-                    showLogIn(context, appWidgetManager, appWidgetIds[0]);
+                    showLogIn(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
                 }else if(response.contains("You are logged in")) {
                     Toast.makeText(context, context.getText(R.string.toast_login), Toast.LENGTH_SHORT).show();
@@ -385,7 +396,9 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     startAlarm(context);
                 }
                 remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
-                appWidgetManager.updateAppWidget(appWidgetIds[0], remoteViews);
+                for(int i : appWidgetIds) {
+                    appWidgetManager.updateAppWidget(i, remoteViews);
+                }
             }
         }, new Response.ErrorListener(){
             @Override
@@ -428,10 +441,11 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     Toast.makeText(context, context.getText(R.string.toast_logout), Toast.LENGTH_SHORT).show();
                     //Log.d("logoutRequest", "LOGGED OUT");
                 }
-                showLogIn(context, appWidgetManager, appWidgetIds[0]);
+                showLogIn(context, appWidgetManager, appWidgetIds);
                 remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
-                appWidgetManager.updateAppWidget(appWidgetIds[0], remoteViews);
-
+                for(int i : appWidgetIds) {
+                    appWidgetManager.updateAppWidget(i, remoteViews);
+                }
             }
         }, new Response.ErrorListener(){
             @Override
