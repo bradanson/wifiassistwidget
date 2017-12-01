@@ -188,13 +188,6 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     wifi.disconnect();
                     wifi.enableNetwork(i.networkId, true);
                     wifi.reconnect();
-                    ThreadManager.runOnUi(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(c.getApplicationContext(), "Connecting to "+ desiredSSID,
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
                     break;
                 }
             }

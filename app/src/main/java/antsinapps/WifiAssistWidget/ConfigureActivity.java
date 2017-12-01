@@ -211,7 +211,15 @@ public class ConfigureActivity extends AppCompatActivity {
         final EditText passwordInput = (EditText) userInfoViewInflated.findViewById(R.id.passwordInput);
         userInfoBuilder.setView(userInfoViewInflated);
         ssidInput.setText(selectedSSID);
+        String readUsername = Utils.readSessionData(this, "username");
+        String readPassword = Utils.readSessionData(this, "password");
 
+        if(!readUsername.equals("DNE") && !readUsername.equals("Username") && !readUsername.equals("username") ){
+            usernameInput.setText(readUsername);
+        }
+        if(!readPassword.equals("DNE")){
+            passwordInput.setText(readPassword);
+        }
         final Context c = this;
 
 
