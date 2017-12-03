@@ -86,6 +86,7 @@ public class ThreadManager {
             @Override
             public void run() {
                 backgroundRunnable.run();
+              //  Log.d("ThreadManager", "running on background is done");
                 runOnUi(uiRunnable);
             }
         });

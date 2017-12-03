@@ -32,13 +32,13 @@ public class WifiAssistWidget extends AppWidgetProvider {
     String password;
     String ssid;
     String WIDGET_SIZE;
-    static boolean uncertainState;
-    static String WIDGET_LARGE = "LARGE";
-    static String WIDGET_SMALL = "SMALL";
+    public static final String WIDGET_LARGE = "LARGE";
+    public static final String WIDGET_SMALL = "SMALL";
     public static final String ACTION_LARGE_AUTO_UPDATE = "LARGE_AUTO_UPDATE";
     public static final String ACTION_SMALL_AUTO_UPDATE = "SMALL_AUTO_UPDATE";
     public static final String ACTION_LARGE_APPWIDGET_UPDATE = "LARGE_APPWIDGET_UPDATE";
     public static final String ACTION_SMALL_APPWIDGET_UPDATE = "SMALL_APPWIDGET_UPDATE";
+    public static final String KNOWS_STATE = "KNOWS_STATE";
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -78,12 +78,12 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 0, configureIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.imageView, configPendingIntent);
 
-
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
     }
 
     @Override
     public void onReceive(final Context context, Intent intent) {
+
         username = Utils.readSessionData(context, "username");
         password = Utils.readSessionData(context, "password");
         ssid = Utils.readSessionData(context, "ssid");
@@ -149,34 +149,53 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 }
             });
         }
-        final String desiredSSID = "\"" + ssid.toUpperCase() + "\"";
-        boolean ssidFound = false;
-        for(ScanResult i : wifi.getScanResults()){
-            if(i.SSID.toUpperCase().equals(ssid.toUpperCase())){
-                ssidFound=true;
-                break;
-            }
-        }
-        if(!ssidFound){
-            ThreadManager.runOnUi(new Runnable() {
-                @Override
-                public void run() {
-                    if(!uncertainState) {
-                        Toast.makeText(c.getApplicationContext(), "Network " + desiredSSID + " not found." +
-                                        " Are location services turned on? Attempting to force connection..",
-                                Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-        }
 
-
+        //boolean ssidFound = false;
+        //ssidFound = connectedToSSID(wifi, ssidFound);
+//        if(!ssidFound){
+//            ThreadManager.runOnUi(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if(!uncertainState) {
+//                        Toast.makeText(c.getApplicationContext(), "Network " + desiredSSID + " not found." +
+//                                        " Are location services turned on? Attempting to force connection..",
+//                                Toast.LENGTH_LONG).show();
+//                    }
+//                }
+//            });
+//        }
         WifiInfo wifiInfo = wifi.getConnectionInfo();
-        if (wifiInfo.getSupplicantState() != SupplicantState.COMPLETED || !wifiInfo.getSSID().equals(desiredSSID)) {
-            // If user is not connected to a network or not the provided SSID, connect them
-            if (!wifiInfo.getSSID().equals(desiredSSID)) {
-                //Not connected to desired network
+        final String desiredSSID = "\"" + ssid.toUpperCase() + "\"";
+        if (!wifiInfo.getSSID().equals(desiredSSID) || wifiInfo.getSupplicantState() != SupplicantState.COMPLETED) {
+            // Log.d("WifiInfo", "STILL NOT CONNECTED TO SSID");
+            try {
+                //  Log.d("WifiInfo", "5seconds are starting!");
+                Thread.sleep(5000);
+                //  Log.d("WifiInfo", "5seconds are up!");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+        }else {
+            // Log.d("WifiInfo", "CONNECTED TO SSID AFTER EVERYTHING");
+        }
+
+
+        connectIfNotConnected(wifi);
+    }
+
+    private void connectIfNotConnected(WifiManager wifi) {
+        // Log.d("connectIfNotConnected", "here");
+        WifiInfo wifiInfo = wifi.getConnectionInfo();
+        final String desiredSSID = "\"" + ssid.toUpperCase() + "\"";
+        if (wifiInfo.getSupplicantState() != SupplicantState.COMPLETED ||
+                wifiInfo.getSSID().length() < 5 ||
+                desiredSSID.length() < 5 ||
+                !(wifiInfo.getSSID().substring(0, 2).equals(desiredSSID.substring(0, 2)))) {
+            //    Log.d("connectIfNotConnected", "attempting to connect..");
+            // If user is not connected to a network or not the provided SSID, connect them
+//            if (!wifiInfo.getSSID().equals(desiredSSID)) {
+//                //Not connected to desired network
+//            }
             WifiConfiguration conf = new WifiConfiguration();
             conf.SSID = desiredSSID;
             conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
@@ -184,7 +203,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
             List<WifiConfiguration> list = wifi.getConfiguredNetworks();
             for( WifiConfiguration i : list ) {
                 if(i.SSID != null && i.SSID.equals(desiredSSID)) {
-                    //Log.d("WifiConfiguration","ssid found: " + i.SSID);
+                    //     Log.d("WifiConfiguration","ssid found: " + i.SSID);
                     wifi.disconnect();
                     wifi.enableNetwork(i.networkId, true);
                     wifi.reconnect();
@@ -192,16 +211,15 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 }
             }
         }
-        if (!wifiInfo.getSSID().equals(desiredSSID)) {
-            //Log.d("WifiInfo", "STILL NOT CONNECTED TO SSID");
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    }
+
+    private boolean findSSID(WifiManager wifi, boolean ssidFound) {
+        for(ScanResult scanResult : wifi.getScanResults()){
+            if(scanResult.SSID.toUpperCase().equals(ssid.toUpperCase())){
+                return true;
             }
-        }else {
-            //Log.d("WifiInfo", "CONNECTED TO SSID AFTER EVERYTHING");
         }
+        return false;
     }
 
     private void alarmCheckStatus(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager, final int iter) {
@@ -231,9 +249,9 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
 
                 //if(response instanceof NoConnectionError){
-                    // Log.d("CheckStatusWithoutLogin", "ERROR/BAD - NOT CONNECTED TO WIFI");
-                    showUncertain(context, appWidgetManager, appWidgetIds);
-                    stopAlarm(context);
+                // Log.d("CheckStatusWithoutLogin", "ERROR/BAD - NOT CONNECTED TO WIFI");
+                showUncertain(context, appWidgetManager, appWidgetIds);
+                stopAlarm(context);
                 //}
             }
         });
@@ -258,8 +276,8 @@ public class WifiAssistWidget extends AppWidgetProvider {
         for(int i : appWidgetIds) {
             appWidgetManager.updateAppWidget(i, remoteViews);
         }
-        //Log.d("uncertainState", "false");
-        uncertainState = false;
+       // Log.d("knows_state", "(showLoggedOut) true");
+        Utils.writeSessionData(context, KNOWS_STATE, "true");
     }
 
     private void showLoggedIn(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -270,8 +288,8 @@ public class WifiAssistWidget extends AppWidgetProvider {
         for(int i : appWidgetIds) {
             appWidgetManager.updateAppWidget(i, remoteViews);
         }
-        //Log.d("uncertainState", "false");
-        uncertainState = false;
+       // Log.d("knows_state", "(showLoggedIn) true");
+        Utils.writeSessionData(context, KNOWS_STATE, "true");
     }
 
     private void showUncertain(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -281,8 +299,8 @@ public class WifiAssistWidget extends AppWidgetProvider {
         for(int i : appWidgetIds) {
             appWidgetManager.updateAppWidget(i, remoteViews);
         }
-        //Log.d("uncertainState", "true");
-        uncertainState = true;
+        //Log.d("knows_state", "(showUncertain) false");
+        Utils.writeSessionData(context, KNOWS_STATE, "false");
     }
 
     private RemoteViews getRemoteViewsBySize(Context context) {
@@ -327,32 +345,33 @@ public class WifiAssistWidget extends AppWidgetProvider {
         StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssidToQuery+".net/status", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                //Log.d("statusRequest", response.toString());
+                //    Log.d("statusRequest", response.toString());
                 RemoteViews remoteViews = getRemoteViewsBySize(context);
                 Intent intent = getIntentBySize(context);
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
                         0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
                 if(response.contains(" | Login Page")){
-                    //Log.d("statusRequest", "BAD - Not logged in, attempting login");
+                    //     Log.d("statusRequest", "BAD - Not logged in, attempting login");
                     if(!username.equals("DNE") && !username.equals("username")){
-                        //Log.d("uncertainState", "Login Page: checkStatus at runtime is: " + uncertainState);
-                        if(uncertainState) showLoggedOut(context, appWidgetManager, appWidgetIds);
-                        else attemptLogin(context, appWidgetIds, appWidgetManager);
+                      //  Log.d("uncertainState", "Login Page: knows_status at runtime is: " + Utils.readSessionData(context, KNOWS_STATE));
+                        if (Boolean.valueOf(Utils.readSessionData(context, KNOWS_STATE))) {
+                            attemptLogin(context, appWidgetIds, appWidgetManager);
+                        } else showLoggedOut(context, appWidgetManager, appWidgetIds);
                     }else{
-                        // Log.d("statusRequest", "BAD - username not set");
+                        //          Log.d("statusRequest", "BAD - username not set");
                     }
                 }else if(response.contains("Status | ")){
-                    //Log.d("statusRequest","GOOD - ALREADY LOGGED IN");
-                    //Log.d("uncertainState", "Status | checkStatus at runtime is: " + uncertainState);
-                    if(uncertainState) {
+                    //     Log.d("statusRequest","GOOD - ALREADY LOGGED IN");
+                    //Log.d("uncertainState", "Status | checkStatus at runtime is: " + Utils.readSessionData(context, KNOWS_STATE));
+                    if (Boolean.valueOf(Utils.readSessionData(context, KNOWS_STATE))) {
+                        requestLogout(context, appWidgetIds, appWidgetManager);
+                    } else {
                         showLoggedIn(context, appWidgetManager, appWidgetIds);
                         startAlarm(context);
-                    }else{
-                        requestLogout(context, appWidgetIds, appWidgetManager);
                     }
                 }else {
-                    //Log.d("statusRequest", "Response from website not recognized.");
+                    //       Log.d("statusRequest", "Response from website not recognized.");
                 }
                 remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
                 for(int i : appWidgetIds) {
@@ -374,7 +393,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
                 if(response instanceof NoConnectionError){
                     //Log.d("Error", "BAD - NOT CONNECTED TO WIFI");
-                    if (iter < 1000) {
+                    if (iter < 100) {
                         final int newIter = iter + 1;
                         if(!ssid.equals("No Network Provided") && !ssid.equals("DNE")) {
                             checkStatus(context, appWidgetIds, appWidgetManager, newIter);
@@ -390,7 +409,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
         String ssidToQuery = conditionSSIDToQuery();
 
         String loginUrl = "http://login."+ssidToQuery+".net/login?username=" + username + "&password=" + password;
-        // Log.d("loginRequest", "url: " + loginUrl);
+        //     Log.d("loginRequest", "url: " + loginUrl);
         StringRequest sr = new StringRequest(Request.Method.POST, loginUrl, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
@@ -492,6 +511,4 @@ public class WifiAssistWidget extends AppWidgetProvider {
         appWidgetAlarm.stopAlarm();
         // Log.d("stopAlarm", "Alarm Stopped");
     }
-
-
 }
