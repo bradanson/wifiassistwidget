@@ -46,22 +46,6 @@ public class WifiAssistWidget extends AppWidgetProvider {
         password = Utils.readSessionData(context, "password");
         ssid = Utils.readSessionData(context, "ssid");
 
-        //  Log.d("onUpdate Widget","ssid: " + ssid);
-        //  Log.d("onUpdate Widget","username: " + username);
-        //  Log.d("onUpdate Widget","password: " + password);
-
-        if(username.equals("DNE")){
-            username = "Username";
-        }
-        if(ssid == null || ssid.equals("DNE")){
-            ssid = "No Network Provided";
-        }
-
-        if(appWidgetIds.length > 0) {
-            checkStatus(context, appWidgetIds, appWidgetManager, 0);
-        }else{
-            //  Log.d("onUpdate", "no appWidgetID's.. Quitting!");
-        }
         RemoteViews remoteViews = getRemoteViewsBySize(context);
 
         // Configure button for next click
@@ -79,6 +63,23 @@ public class WifiAssistWidget extends AppWidgetProvider {
         remoteViews.setOnClickPendingIntent(R.id.imageView, configPendingIntent);
 
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
+
+        //  Log.d("onUpdate Widget","ssid: " + ssid);
+        //  Log.d("onUpdate Widget","username: " + username);
+        //  Log.d("onUpdate Widget","password: " + password);
+
+        if(username.equals("DNE")){
+            username = "Username";
+        }
+        if(ssid == null || ssid.equals("DNE")){
+            ssid = "No Network Provided";
+        }
+
+        if(appWidgetIds.length > 0) {
+            checkStatus(context, appWidgetIds, appWidgetManager, 0);
+        }else{
+            //  Log.d("onUpdate", "no appWidgetID's.. Quitting!");
+        }
     }
 
     @Override
@@ -96,6 +97,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_DISABLED)){
             return;
         }
+
         if(username.equals("Username") || username.equals("DNE") ||
                 ssid.equals("No Network Provided") || ssid.equals("DNE")){
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -104,7 +106,6 @@ public class WifiAssistWidget extends AppWidgetProvider {
             onUpdate(context, appWidgetManager, appWidgetIds);
             return;
         }
-
 
         if(intent.getAction().equals(ACTION_SMALL_AUTO_UPDATE) || intent.getAction().equals(ACTION_LARGE_AUTO_UPDATE)) {
             //Log.d("onReceive", ACTION_AUTO_UPDATE + " = " + ACTION_AUTO_UPDATE + ", Returning Void");
@@ -127,7 +128,8 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(c);
                 ComponentName thisAppWidget = getComponentNameBySize(c);
                 int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisAppWidget);
-                onUpdate(c, appWidgetManager, appWidgetIds);            }
+                onUpdate(c, appWidgetManager, appWidgetIds);
+            }
         });
     }
 
@@ -181,6 +183,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
 
         connectIfNotConnected(wifi);
+        return;
     }
 
     private void connectIfNotConnected(WifiManager wifi) {
@@ -211,6 +214,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 }
             }
         }
+        return;
     }
 
     private boolean findSSID(WifiManager wifi, boolean ssidFound) {
@@ -224,8 +228,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
     private void alarmCheckStatus(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager, final int iter) {
         //Log.d("CheckStatusWithoutLogin", "Checking Status Without Logging In..");
-        String ssidToQuery = conditionSSIDToQuery();
-        StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssidToQuery+".net/status", new Response.Listener<String>() {
+        StringRequest sr = new StringRequest(Request.Method.POST, "http://login.101global.net/status", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 //Log.d("statusRequest", response.toString());
@@ -340,11 +343,10 @@ public class WifiAssistWidget extends AppWidgetProvider {
     void checkStatus(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager, final int iter) {
         //  Log.d("statusRequest", "Sending request");
         //  Log.d("statusRequest", "url: "+ "http://login."+ssid+".net/status");
-        String ssidToQuery = conditionSSIDToQuery();
-
-        StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssidToQuery+".net/status", new Response.Listener<String>() {
+        StringRequest sr = new StringRequest(Request.Method.POST, "http://login.101global.net/status", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                //Toast.makeText(context, "status response received..", Toast.LENGTH_SHORT).show();
                 //    Log.d("statusRequest", response.toString());
                 RemoteViews remoteViews = getRemoteViewsBySize(context);
                 Intent intent = getIntentBySize(context);
@@ -407,12 +409,13 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
     private void attemptLogin(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager) {
         String ssidToQuery = conditionSSIDToQuery();
-
-        String loginUrl = "http://login."+ssidToQuery+".net/login?username=" + username + "&password=" + password;
+        //Toast.makeText(context, "attempting login..", Toast.LENGTH_SHORT).show();
+        String loginUrl = "http://login.101global.net/login?username=" + username + "&password=" + password;
         //     Log.d("loginRequest", "url: " + loginUrl);
         StringRequest sr = new StringRequest(Request.Method.POST, loginUrl, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+             //   Toast.makeText(context, "login response received..", Toast.LENGTH_SHORT).show();
 //                Log.d("loginRequest", response.toString());
                 RemoteViews remoteViews = getRemoteViewsBySize(context);
                 Intent intent = getIntentBySize(context);
@@ -471,7 +474,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
     private void requestLogout(final Context context, final int[] appWidgetIds, final AppWidgetManager appWidgetManager) {
         stopAlarm(context);
 
-        StringRequest sr = new StringRequest(Request.Method.POST, "http://login."+ssid+ ".net/logout?", new Response.Listener<String>() {
+        StringRequest sr = new StringRequest(Request.Method.POST, "http://login.101global.net/logout?", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 RemoteViews remoteViews = getRemoteViewsBySize(context);
