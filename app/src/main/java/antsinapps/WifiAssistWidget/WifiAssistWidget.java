@@ -47,21 +47,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
         ssid = Utils.readSessionData(context, "ssid");
 
         RemoteViews remoteViews = getRemoteViewsBySize(context);
-
-        // Configure button for next click
-        Intent intent = getIntentBySize(context);
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-                0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
-
-        // Configure image for next click
-        Intent configureIntent = new Intent(context, ConfigureActivity.class);
-        configureIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
-        PendingIntent configPendingIntent = PendingIntent.getActivity(context,
-                0, configureIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        remoteViews.setOnClickPendingIntent(R.id.imageView, configPendingIntent);
-
+        remoteViews = configureButtons(context, appWidgetIds, remoteViews);
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
 
         //  Log.d("onUpdate Widget","ssid: " + ssid);
@@ -80,6 +66,24 @@ public class WifiAssistWidget extends AppWidgetProvider {
         }else{
             //  Log.d("onUpdate", "no appWidgetID's.. Quitting!");
         }
+    }
+
+    private RemoteViews configureButtons(Context context, int[] appWidgetIds, RemoteViews remoteViews) {
+        // Configure button for next click
+        Intent intent = getIntentBySize(context);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
+                0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
+
+        // Configure image for next click
+        Intent configureIntent = new Intent(context, ConfigureActivity.class);
+        configureIntent.setAction(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
+        PendingIntent configPendingIntent = PendingIntent.getActivity(context,
+                0, configureIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.imageView, configPendingIntent);
+
+        return remoteViews;
     }
 
     @Override
@@ -274,6 +278,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
     private void showLoggedOut(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         RemoteViews remoteViews = getRemoteViewsBySize(context);
+        remoteViews = configureButtons(context, appWidgetIds, remoteViews);
         remoteViews.setImageViewResource(R.id.imageView, R.drawable.bad_signal);
         remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.login));
         for(int i : appWidgetIds) {
@@ -285,6 +290,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
     private void showLoggedIn(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         RemoteViews remoteViews = getRemoteViewsBySize(context);
+        remoteViews = configureButtons(context, appWidgetIds, remoteViews);
         remoteViews.setImageViewResource(R.id.imageView, R.drawable.good_signal);
         remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.logout));
 
@@ -297,6 +303,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
     private void showUncertain(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         RemoteViews remoteViews = getRemoteViewsBySize(context);
+        remoteViews = configureButtons(context, appWidgetIds, remoteViews);
         remoteViews.setImageViewResource(R.id.imageView, R.drawable.unsure);
         remoteViews.setTextViewText(R.id.actionButton, context.getText(R.string.check_status));
         for(int i : appWidgetIds) {
@@ -346,14 +353,18 @@ public class WifiAssistWidget extends AppWidgetProvider {
         StringRequest sr = new StringRequest(Request.Method.POST, "http://login.101global.net/status", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                //Toast.makeText(context, "status response received..", Toast.LENGTH_SHORT).show();
-                //    Log.d("statusRequest", response.toString());
+//                Toast.makeText(context, "status response received..", Toast.LENGTH_SHORT).show();
+//                Log.d("statusRequest", response.toString());
                 RemoteViews remoteViews = getRemoteViewsBySize(context);
                 Intent intent = getIntentBySize(context);
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
                         0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                if(response.contains(" | Login Page")){
+                if(response.contains("INTERNET BLACKOUT")){
+                    Toast.makeText(context, "Internet Blackout", Toast.LENGTH_SHORT).show();
+                }else if(response.contains("RADIUS server is not responding")){
+                    Toast.makeText(context, "RADIUS server is not responding", Toast.LENGTH_SHORT).show();
+                }else if(response.contains(" | Login Page")){
                     //     Log.d("statusRequest", "BAD - Not logged in, attempting login");
                     if(!username.equals("DNE") && !username.equals("username")){
                       //  Log.d("uncertainState", "Login Page: knows_status at runtime is: " + Utils.readSessionData(context, KNOWS_STATE));

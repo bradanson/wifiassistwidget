@@ -16,14 +16,12 @@ class AppWidgetAlarm
     private String mSize;
 
 
-    AppWidgetAlarm(Context context, String size)
-    {
+    AppWidgetAlarm(Context context, String size) {
         mContext = context;
         mSize = size;
     }
 
-    void startAlarm()
-    {
+    void startAlarm() {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MILLISECOND, INTERVAL_MILLIS);
         Intent alarmIntent = new Intent(WifiAssistWidget.ACTION_SMALL_AUTO_UPDATE);
@@ -38,8 +36,7 @@ class AppWidgetAlarm
     }
 
 
-    void stopAlarm()
-    {
+    void stopAlarm() {
         Intent alarmIntent = new Intent(WifiAssistWidget.ACTION_SMALL_AUTO_UPDATE);
         if(mSize.equals(WifiAssistWidget.WIDGET_LARGE)) {
             alarmIntent = new Intent(WifiAssistWidget.ACTION_LARGE_AUTO_UPDATE);
