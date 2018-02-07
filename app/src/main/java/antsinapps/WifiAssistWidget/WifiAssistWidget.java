@@ -431,29 +431,29 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
                         0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                if(response.contains("You are already logged in")){
-                    Toast.makeText(context, context.getText(R.string.toast_already_logged_in), Toast.LENGTH_SHORT).show();
-                    // Log.d("loginRequest", "BAD - ALREADY LOGGED IN ON ANOTHER DEVICE");
-                    showLoggedOut(context, appWidgetManager, appWidgetIds);
-                    stopAlarm(context);
-                }else if(response.contains("invalid username or password")){
-                    Toast.makeText(context, context.getText(R.string.toast_invalid_un_or_pw), Toast.LENGTH_SHORT).show();
-                    //Log.d("loginRequest", "BAD - invalid username or password");
-                    showLoggedOut(context, appWidgetManager, appWidgetIds);
-                    stopAlarm(context);
-                }else if(response.contains("access denied")){
-                    // Log.d("loginRequest", "BAD - ACCESS DENIED");
-                    showLoggedOut(context, appWidgetManager, appWidgetIds);
-                    stopAlarm(context);
-                }else if(response.contains("You are logged in")) {
+                if(response.contains("You are logged in")) {
                     Toast.makeText(context, context.getText(R.string.toast_login), Toast.LENGTH_SHORT).show();
                     // Log.d("loginRequest", "GOOD - LOGGED IN");
                     showLoggedIn(context, appWidgetManager, appWidgetIds);
                     startAlarm(context);
-                }else{
-                Toast.makeText(context, context.getText(R.string.toast_login_failed), Toast.LENGTH_SHORT).show();
-                // Log.d("loginRequest", "GOOD - LOGGED IN");
-                showLoggedOut(context, appWidgetManager, appWidgetIds);
+                }else {
+                    if(response.contains("You are already logged in")) {
+                        Toast.makeText(context, context.getText(R.string.toast_already_logged_in), Toast.LENGTH_SHORT).show();
+                        // Log.d("loginRequest", "BAD - ALREADY LOGGED IN ON ANOTHER DEVICE");}
+                    }else if(response.contains("expire")){
+                        Toast.makeText(context, context.getText(R.string.toast_account_expired), Toast.LENGTH_SHORT).show();
+                        // Log.d("loginRequest", "BAD - Account expired");
+                    }else if(response.contains("invalid username or password")){
+                        Toast.makeText(context, context.getText(R.string.toast_invalid_un_or_pw), Toast.LENGTH_SHORT).show();
+                        //Log.d("loginRequest", "BAD - invalid username or password");
+                    }else if(response.contains("access denied")){
+                        // Log.d("loginRequest", "BAD - ACCESS DENIED");
+                    }else{
+                        Toast.makeText(context, context.getText(R.string.toast_login_failed), Toast.LENGTH_SHORT).show();
+                        // Log.d("loginRequest", "BAD - LOGIN FAILED");
+                    }
+                    showLoggedOut(context, appWidgetManager, appWidgetIds);
+                    stopAlarm(context);
                 }
                 remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
                 for(int i : appWidgetIds) {
