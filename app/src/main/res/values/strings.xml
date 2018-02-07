@@ -11,6 +11,7 @@
     <string name="wifiDialogTitle">"Select Your WiFi Network"</string>
     <string name="toast_logout">You have logged out</string>
     <string name="toast_login">You have logged in</string>
+    <string name="toast_login_failed">Login failed, check website</string>
     <string name="toast_invalid_un_or_pw">Invalid username or password</string>
     <string name="toast_enabling_wifi">Enabling WiFi…</string>
     <string name="toast_auth_failed">Authentication Failed</string>

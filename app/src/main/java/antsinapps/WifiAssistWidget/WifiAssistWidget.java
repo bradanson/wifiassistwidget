@@ -360,9 +360,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
                         0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                if(response.contains("INTERNET BLACKOUT")){
-                    Toast.makeText(context, "Internet Blackout", Toast.LENGTH_SHORT).show();
-                }else if(response.contains("RADIUS server is not responding")){
+                if(response.contains("RADIUS server is not responding")){
                     Toast.makeText(context, "RADIUS server is not responding", Toast.LENGTH_SHORT).show();
                 }else if(response.contains(" | Login Page")){
                     //     Log.d("statusRequest", "BAD - Not logged in, attempting login");
@@ -452,6 +450,10 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     // Log.d("loginRequest", "GOOD - LOGGED IN");
                     showLoggedIn(context, appWidgetManager, appWidgetIds);
                     startAlarm(context);
+                }else{
+                Toast.makeText(context, context.getText(R.string.toast_login_failed), Toast.LENGTH_SHORT).show();
+                // Log.d("loginRequest", "GOOD - LOGGED IN");
+                showLoggedOut(context, appWidgetManager, appWidgetIds);
                 }
                 remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
                 for(int i : appWidgetIds) {
