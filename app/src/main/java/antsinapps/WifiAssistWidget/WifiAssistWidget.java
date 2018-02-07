@@ -21,6 +21,7 @@ import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 
@@ -398,6 +399,10 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     Toast.makeText(context, context.getText(R.string.toast_server_error), Toast.LENGTH_LONG).show();
                 }
 
+                if(response instanceof TimeoutError){
+                    Toast.makeText(context, context.getText(R.string.toast_timeout_error), Toast.LENGTH_LONG).show();
+                }
+
                 if(response instanceof AuthFailureError){
                     Toast.makeText(context, context.getText(R.string.toast_auth_failed), Toast.LENGTH_SHORT).show();
                 }
@@ -425,7 +430,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
             @Override
             public void onResponse(String response) {
              //   Toast.makeText(context, "login response received..", Toast.LENGTH_SHORT).show();
-//                Log.d("loginRequest", response.toString());
+                Log.d("loginRequest", response.toString());
                 RemoteViews remoteViews = getRemoteViewsBySize(context);
                 Intent intent = getIntentBySize(context);
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
@@ -467,6 +472,10 @@ public class WifiAssistWidget extends AppWidgetProvider {
 
                 if(response instanceof ServerError){
                     Toast.makeText(context, context.getText(R.string.toast_server_error), Toast.LENGTH_LONG).show();
+                }
+
+                if(response instanceof TimeoutError){
+                    Toast.makeText(context, context.getText(R.string.toast_timeout_error), Toast.LENGTH_LONG).show();
                 }
 
                 if(response instanceof AuthFailureError){
