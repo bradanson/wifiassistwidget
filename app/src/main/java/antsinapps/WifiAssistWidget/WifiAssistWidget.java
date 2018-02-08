@@ -1,5 +1,7 @@
 package antsinapps.WifiAssistWidget;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -277,6 +279,51 @@ public class WifiAssistWidget extends AppWidgetProvider {
         return ssidToQuery;
     }
 
+
+    public void notifyLoggedIn(Context c){
+        // Setup progress notification
+        Notification.Builder mBuilder = new Notification.Builder(c);
+        NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Notification initialNotification = mBuilder.setContentTitle("WiFi Assist Widget")
+                .setContentText("Logged in.")
+                .setSmallIcon(R.drawable.good_signal)
+                .setPriority(Notification.PRIORITY_LOW)
+                .build();
+
+        notificationManager.notify(0, initialNotification);
+    }
+
+
+    public void notifyLoggedOut(Context c){
+        // Setup progress notification
+        Notification.Builder mBuilder = new Notification.Builder(c);
+        NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Notification initialNotification = mBuilder.setContentTitle("WiFi Assist Widget")
+                .setContentText("Logged out.")
+                .setSmallIcon(R.drawable.bad_signal)
+                .setPriority(Notification.PRIORITY_LOW)
+                .build();
+
+        notificationManager.notify(0, initialNotification);
+    }
+
+    public void notifyUncertain(Context c){
+        // Setup progress notification
+        Notification.Builder mBuilder = new Notification.Builder(c);
+        NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Notification initialNotification = mBuilder.setContentTitle("WiFi Assist Widget")
+                .setContentText("Cannot determine connection status.")
+                .setSmallIcon(R.drawable.unsure)
+                .setPriority(Notification.PRIORITY_LOW)
+                .build();
+
+        notificationManager.notify(0, initialNotification);
+    }
+
+
     private void showLoggedOut(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         RemoteViews remoteViews = getRemoteViewsBySize(context);
         remoteViews = configureButtons(context, appWidgetIds, remoteViews);
@@ -312,6 +359,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
         }
         //Log.d("knows_state", "(showUncertain) false");
         Utils.writeSessionData(context, KNOWS_STATE, "false");
+        notifyUncertain(context);
     }
 
     private RemoteViews getRemoteViewsBySize(Context context) {
@@ -440,6 +488,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     Toast.makeText(context, context.getText(R.string.toast_login), Toast.LENGTH_SHORT).show();
                     // Log.d("loginRequest", "GOOD - LOGGED IN");
                     showLoggedIn(context, appWidgetManager, appWidgetIds);
+                    notifyLoggedIn(context);
                     startAlarm(context);
                 }else {
                     if(response.contains("You are already logged in")) {
@@ -511,6 +560,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     //Log.d("logoutRequest", "LOGGED OUT");
                 }
                 showLoggedOut(context, appWidgetManager, appWidgetIds);
+                notifyLoggedOut(context);
                 remoteViews.setOnClickPendingIntent(R.id.actionButton, pendingIntent);
                 for(int i : appWidgetIds) {
                     appWidgetManager.updateAppWidget(i, remoteViews);
