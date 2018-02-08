@@ -80,19 +80,15 @@ public class ConfigureActivity extends AppCompatActivity {
 
         if(requestCode == LOCATION_REQUEST_CODE && resultCode == GOOD_RESULT){
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                    (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                            checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                            checkSelfPermission(Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
+                    (checkSelfPermission(Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
                             checkSelfPermission(Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
                             checkSelfPermission(Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED ||
-                            checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED ||
-                            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED))
+                            checkSelfPermission(Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED))
             {
                 // Log.d("ConfigureActivity", "Requesting Permissions..");
-                ActivityCompat.requestPermissions(ConfigureActivity.this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE,
+                ActivityCompat.requestPermissions(ConfigureActivity.this, new String[]{Manifest.permission.ACCESS_WIFI_STATE,
                         Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.ACCESS_NETWORK_STATE,
-                        Manifest.permission.INTERNET, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0x2345);
+                        Manifest.permission.INTERNET}, 0x2345);
             }else{
                 // Log.d("ConfigureActivity", "Permissions Request Not Necessary");
                 // Either app already granted permissions or device is older than Marshmallow
@@ -206,12 +202,9 @@ public class ConfigureActivity extends AppCompatActivity {
         AlertDialog.Builder userInfoBuilder = new AlertDialog.Builder(this);
         userInfoBuilder.setTitle(getResources().getString(R.string.userDialogTitle));
         View userInfoViewInflated = LayoutInflater.from(this).inflate(R.layout.dialog_input_layout, contentView, false);
-        final EditText ssidInput = (EditText) userInfoViewInflated.findViewById(R.id.ssidInput);
         final EditText usernameInput = (EditText) userInfoViewInflated.findViewById(R.id.usernameInput);
         final EditText passwordInput = (EditText) userInfoViewInflated.findViewById(R.id.passwordInput);
-        userInfoBuilder.setView(userInfoViewInflated);
-        ssidInput.setText(selectedSSID);
-        String readUsername = Utils.readSessionData(this, "username");
+        userInfoBuilder.setView(userInfoViewInflated);String readUsername = Utils.readSessionData(this, "username");
         String readPassword = Utils.readSessionData(this, "password");
 
         if(!readUsername.equals("DNE") && !readUsername.equals("Username") && !readUsername.equals("username") ){
@@ -226,7 +219,7 @@ public class ConfigureActivity extends AppCompatActivity {
         userInfoBuilder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                ssid = ssidInput.getText().toString();
+                ssid = "101Global";
                 username = usernameInput.getText().toString();
                 password = passwordInput.getText().toString();
                 Utils.writeSessionData(c, "ssid", ssid);

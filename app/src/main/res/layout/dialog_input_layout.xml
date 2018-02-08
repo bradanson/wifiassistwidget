@@ -12,20 +12,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="top"
-            android:hint="@string/ssid">
-
-            <AutoCompleteTextView
-                android:id="@+id/ssidInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:imeOptions="actionDone" />
-        </android.support.design.widget.TextInputLayout>
-
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="top"
             android:hint="@string/username">
 
             <AutoCompleteTextView
