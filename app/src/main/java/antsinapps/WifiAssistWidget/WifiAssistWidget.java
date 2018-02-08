@@ -244,12 +244,12 @@ public class WifiAssistWidget extends AppWidgetProvider {
                     // Log.d("CheckStatusWithoutLogin", "BAD - Not logged in. Setting symbol/stopping alarm.");
                     showLoggedOut(context, appWidgetManager, appWidgetIds);
                     stopAlarm(context);
+                    notifyLoggedOut(context);
                 }else if(response.contains("Status | ")){
                     // Log.d("CheckStatusWithoutLogin","GOOD - LOGGED IN ALREADY");
                     showLoggedIn(context,appWidgetManager,appWidgetIds);
                 }else{
                     showUncertain(context, appWidgetManager, appWidgetIds);
-                    stopAlarm(context);
                 }
             }
         }, new Response.ErrorListener(){
