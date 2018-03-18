@@ -11,7 +11,8 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:src="@drawable/bad_signal"/>
+        android:src="@drawable/bad_signal"
+        android:onClick="onClickBtn"/>
 
     <Button
         android:id="@+id/actionButton"
@@ -19,6 +20,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:textSize="6pt"
-        android:text="@string/login"/>
+        android:text="@string/login"
+        android:onClick="onClickBtn"/>
 
 </LinearLayout>

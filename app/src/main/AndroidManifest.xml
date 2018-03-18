@@ -16,17 +16,17 @@
         android:roundIcon="@drawable/good_signal"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Dialog.Alert">
-        <receiver android:name=".WifiAssistWidgetLarge">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="LARGE_APPWIDGET_UPDATE" />
-                <action android:name="LARGE_AUTO_UPDATE" />
-            </intent-filter>
+        <!--<receiver android:name=".WifiAssistWidgetLarge">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />-->
+                <!--<action android:name="LARGE_APPWIDGET_UPDATE" />-->
+                <!--<action android:name="LARGE_AUTO_UPDATE" />-->
+            <!--</intent-filter>-->
 
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_large_info" />
-        </receiver>
+            <!--<meta-data-->
+                <!--android:name="android.appwidget.provider"-->
+                <!--android:resource="@xml/widget_large_info" />-->
+        <!--</receiver>-->
         <receiver android:name=".WifiAssistWidgetSmall">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

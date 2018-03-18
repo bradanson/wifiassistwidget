@@ -16,9 +16,10 @@
     <string name="toast_invalid_un_or_pw">Invalid username or password</string>
     <string name="toast_enabling_wifi">Enabling WiFi…</string>
     <string name="toast_auth_failed">Authentication Failed</string>
-    <string name="toast_timeout_error">Login request timed out. Try again.</string>
+    <string name="toast_status_timeout_error">Status check request timed out. Try again.</string>
+    <string name="toast_login_timeout_error">Login request timed out. Try again.</string>
     <string name="toast_server_error">Server error encountered while logging in. Check your username/password or try again later.</string>
-    <string name="toast_no_networks">No WiFi networks found. Please enter SSID manually.</string>
+    <string name="toast_no_networks">No WiFi networks found.</string>
     <string name="toast_not_connected_to_ssid">Not connected to given SSID: </string>
     <string name="toast_already_logged_in">You are already logged in - access denied</string>
 

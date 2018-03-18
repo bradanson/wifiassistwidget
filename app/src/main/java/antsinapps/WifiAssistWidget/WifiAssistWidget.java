@@ -261,7 +261,6 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 //if(response instanceof NoConnectionError){
                 // Log.d("CheckStatusWithoutLogin", "ERROR/BAD - NOT CONNECTED TO WIFI");
                 showUncertain(context, appWidgetManager, appWidgetIds);
-                stopAlarm(context);
                 //}
             }
         });
@@ -286,7 +285,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
         NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Notification initialNotification = mBuilder.setContentTitle("WiFi Assist Widget")
-                .setContentText("Logged in.")
+                .setContentText("Logged in")
                 .setSmallIcon(R.drawable.good_signal)
                 .setPriority(Notification.PRIORITY_LOW)
                 .build();
@@ -301,7 +300,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
         NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
 
         Notification initialNotification = mBuilder.setContentTitle("WiFi Assist Widget")
-                .setContentText("Logged out.")
+                .setContentText("Logged out")
                 .setSmallIcon(R.drawable.bad_signal)
                 .setPriority(Notification.PRIORITY_LOW)
                 .build();
@@ -309,19 +308,19 @@ public class WifiAssistWidget extends AppWidgetProvider {
         notificationManager.notify(0, initialNotification);
     }
 
-    public void notifyUncertain(Context c){
-        // Setup progress notification
-        Notification.Builder mBuilder = new Notification.Builder(c);
-        NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Notification initialNotification = mBuilder.setContentTitle("WiFi Assist Widget")
-                .setContentText("Cannot determine connection status.")
-                .setSmallIcon(R.drawable.unsure)
-                .setPriority(Notification.PRIORITY_LOW)
-                .build();
-
-        notificationManager.notify(0, initialNotification);
-    }
+//    public void notifyUncertain(Context c){
+//        // Setup progress notification
+//        Notification.Builder mBuilder = new Notification.Builder(c);
+//        NotificationManager notificationManager = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//        Notification initialNotification = mBuilder.setContentTitle("WiFi Assist Widget")
+//                .setContentText("Cannot determine connection status.")
+//                .setSmallIcon(R.drawable.unsure)
+//                .setPriority(Notification.PRIORITY_LOW)
+//                .build();
+//
+//        notificationManager.notify(0, initialNotification);
+//    }
 
 
     private void showLoggedOut(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -359,7 +358,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
         }
         //Log.d("knows_state", "(showUncertain) false");
         Utils.writeSessionData(context, KNOWS_STATE, "false");
-        notifyUncertain(context);
+        //notifyUncertain(context);
     }
 
     private RemoteViews getRemoteViewsBySize(Context context) {
@@ -448,7 +447,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 }
 
                 if(response instanceof TimeoutError){
-                    Toast.makeText(context, context.getText(R.string.toast_timeout_error), Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, context.getText(R.string.toast_status_timeout_error), Toast.LENGTH_LONG).show();
                 }
 
                 if(response instanceof AuthFailureError){
@@ -524,7 +523,7 @@ public class WifiAssistWidget extends AppWidgetProvider {
                 }
 
                 if(response instanceof TimeoutError){
-                    Toast.makeText(context, context.getText(R.string.toast_timeout_error), Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, context.getText(R.string.toast_login_timeout_error), Toast.LENGTH_LONG).show();
                 }
 
                 if(response instanceof AuthFailureError){
